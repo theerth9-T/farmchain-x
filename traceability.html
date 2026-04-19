@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmChain X | Proof of Provenance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f1f5f9; overflow-x: hidden; }
+        
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .accent-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        
+        .timeline-item::after { content: ''; position: absolute; left: 20px; top: 40px; bottom: -20px; width: 2px; background: #334155; }
+        .timeline-item:last-child::after { display: none; }
+        .timeline-item.completed::after { background: #10b981; }
+
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .pulse { animation: pulse-green 2s infinite; }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div class="max-w-4xl mx-auto px-4 py-12">
+        <!-- Brand Header -->
+        <header class="flex justify-between items-center mb-12">
+            <div class="flex flex-col">
+                <span class="text-[10px] font-black tracking-[0.3em] text-emerald-500 uppercase">FarmChain X Verified</span>
+                <h1 class="text-3xl font-extrabold tracking-tighter">BATCH PROVENANCE</h1>
+            </div>
+            <div class="glass px-4 py-2 rounded-2xl flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-emerald-500 pulse"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-emerald-500">Live Ledger</span>
+            </div>
+        </header>
+
+        <div id="loading" class="text-center py-20">
+            <i class="fas fa-circle-notch fa-spin text-4xl text-emerald-500"></i>
+            <p class="mt-4 text-slate-400 font-medium">Hashing batch history...</p>
+        </div>
+
+        <div id="content" class="hidden space-y-8">
+            <!-- Summary Card -->
+            <div class="glass p-8 rounded-[2.5rem] relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 accent-gradient blur-[80px] opacity-20"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                    <div>
+                        <h2 id="crop-variety" class="text-4xl font-black mb-2">—</h2>
+                        <p class="text-slate-400 text-sm flex items-center gap-2">
+                            <i class="fas fa-fingerprint text-emerald-500"></i> 
+                            ID: <span id="batch-id" class="font-mono">#—</span>
+                        </p>
+                        
+                        <div class="mt-8 flex gap-4">
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 w-1/2">
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Farmer</span>
+                                <div id="farmer-name" class="font-bold text-sm mt-1">—</div>
+                            </div>
+                            <div class="bg-white/5 p-4 rounded-2xl border border-white/5 w-1/2">
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Location</span>
+                                <div id="location" class="font-bold text-sm mt-1">—</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center justify-center p-6 bg-emerald-500/10 rounded-[2rem] border border-emerald-500/20">
+                        <span class="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-4">AI Health Score</span>
+                        <div class="relative w-32 h-32 flex items-center justify-center">
+                            <canvas id="healthChart"></canvas>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span id="health-score" class="text-4xl font-black text-emerald-500">0%</span>
+                            </div>
+                        </div>
+                        <div id="ai-status" class="mt-4 font-black uppercase tracking-tight text-emerald-500">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Timeline & Governance -->
+                <div class="lg:col-span-1 space-y-8">
+                    <div class="glass p-8 rounded-[2.5rem]">
+                        <h3 class="text-lg font-bold mb-8 flex items-center gap-2 text-emerald-500">
+                            <i class="fas fa-route"></i> Lifecycle
+                        </h3>
+                        <div id="timeline" class="space-y-8">
+                            <!-- Items injected here -->
+                        </div>
+                    </div>
+
+                    <div class="glass p-8 rounded-[2.5rem] border-emerald-500/10">
+                        <h3 class="text-xs font-black mb-6 flex items-center gap-2 text-slate-400 uppercase tracking-[0.2em]">
+                            <i class="fas fa-shield-halved"></i> Governance Log
+                        </h3>
+                        <div id="governance-log" class="space-y-4">
+                            <!-- Ledger entries injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IoT Live Data -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass p-8 rounded-[2.5rem]">
+                        <div class="flex justify-between items-center mb-8">
+                            <h3 class="text-lg font-bold flex items-center gap-2">
+                                <i class="fas fa-chart-line text-emerald-500"></i> Real-Time Telemetry
+                            </h3>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Every 10s</span>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="telemetryChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- AI Recommendation -->
+                    <div class="accent-gradient p-8 rounded-[2.5rem] shadow-xl shadow-emerald-500/20">
+                        <div class="flex items-start gap-5">
+                            <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-xl">
+                                <i class="fas fa-robot text-white"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-black text-white text-lg">AI Verification Insight</h4>
+                                <p id="ai-recommendation" class="text-white/80 text-sm mt-2 leading-relaxed">Analyzing ledger history and current environmental stability...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <footer class="text-center py-12 border-t border-white/5">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.4em]">Powered by FarmChain X Distributed Ledger Technology</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const batchId = urlParams.get('batchId');
+        let telemetryChart, healthChart;
+        let socket;
+
+        if (!batchId) {
+            document.body.innerHTML = `<div class="flex items-center justify-center h-screen"><p class="text-xl font-bold">Invalid Batch ID</p></div>`;
+        } else {
+            init();
+        }
+
+        async function init() {
+            try {
+                const [batchRes, ledgerRes] = await Promise.all([
+                    fetch(`/api/batches/${batchId}`),
+                    fetch(`/api/batches/${batchId}/ledger`)
+                ]);
+                
+                const batchResult = await batchRes.json();
+                const ledgerResult = await ledgerRes.json();
+                
+                if (batchResult.success) {
+                    renderUI(batchResult.data, ledgerResult.data || []);
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('content').classList.remove('hidden');
+                    
+                    initSocket();
+                } else {
+                    document.body.innerHTML = `<div class="flex items-center justify-center h-screen"><p class="text-xl font-bold">Batch Not Found</p></div>`;
+                }
+            } catch (err) {
+                console.error('Init Error:', err);
+            }
+        }
+
+        function renderUI(batch, ledger) {
+            document.getElementById('crop-variety').innerText = batch.cropVariety;
+            document.getElementById('batch-id').innerText = `#${batch.batchId || batch._id.slice(0, 8)}`;
+            document.getElementById('farmer-name').innerText = batch.farmer.name;
+            document.getElementById('location').innerText = batch.location;
+
+            // AI Section
+            const ai = batch.aiAnalysis || { score: 0, status: 'Unknown', recommendation: 'Awaiting first telemetry ping...' };
+            document.getElementById('health-score').innerText = `${ai.score}%`;
+            document.getElementById('ai-status').innerText = ai.status;
+            document.getElementById('ai-recommendation').innerText = ai.recommendation;
+
+            initHealthChart(ai.score);
+            initTelemetryChart(batch._id);
+            renderTimeline(batch.timeline);
+            renderGovernance(ledger);
+        }
+
+        function renderGovernance(ledger) {
+            const container = document.getElementById('governance-log');
+            if (ledger.length === 0) {
+                container.innerHTML = '<div class="text-[9px] text-slate-500 italic">No blockchain entries yet.</div>';
+                return;
+            }
+
+            container.innerHTML = ledger.map(entry => `
+                <div class="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[9px] font-black text-emerald-500 uppercase">${entry.action}</span>
+                        <span class="text-[8px] font-bold text-slate-500">${new Date(entry.timestamp).toLocaleTimeString()}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium">${entry.details ? JSON.stringify(entry.details).slice(0, 50) + '...' : 'System Verification Completed'}</p>
+                </div>
+            `).reverse().join('');
+        }
+
+        function renderTimeline(timeline) {
+            const container = document.getElementById('timeline');
+            container.innerHTML = timeline.map(item => `
+                <div class="timeline-item relative flex items-start gap-4 ${item.completed ? 'completed' : ''}">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center z-10 ${item.completed ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border border-slate-700'}">
+                        <i class="fas ${getIcon(item.stage)} text-xs"></i>
+                    </div>
+                    <div>
+                        <div class="text-sm font-bold ${item.completed ? 'text-white' : 'text-slate-500'}">${item.stage}</div>
+                        ${item.date ? `<div class="text-[9px] font-bold text-slate-500 uppercase mt-1">${new Date(item.date).toLocaleDateString()}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getIcon(stage) {
+            const icons = { 'Sown': 'fa-seedling', 'Growing': 'fa-leaf', 'Harvested': 'fa-bucket', 'Processed': 'fa-box', 'Shipped': 'fa-truck', 'Delivered': 'fa-home' };
+            return icons[stage] || 'fa-check';
+        }
+
+        function initHealthChart(score) {
+            const ctx = document.getElementById('healthChart').getContext('2d');
+            healthChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [score, 100 - score],
+                        backgroundColor: ['#10b981', 'rgba(255,255,255,0.05)'],
+                        borderWidth: 0,
+                        circumference: 270,
+                        rotation: 225
+                    }]
+                },
+                options: {
+                    cutout: '85%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        async function initTelemetryChart(id) {
+            const ctx = document.getElementById('telemetryChart').getContext('2d');
+            
+            // Fetch initial history
+            const res = await fetch(`/api/batches/${id}/sensors`);
+            const json = await res.json();
+            const initialData = (json.data || []).reverse();
+            
+            telemetryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: initialData.map(d => new Date(d.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })),
+                    datasets: [
+                        {
+                            label: 'Temperature',
+                            data: initialData.map(d => d.temperature),
+                            borderColor: '#10b981',
+                            tension: 0.4,
+                            fill: true,
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)'
+                        },
+                        {
+                            label: 'Moisture',
+                            data: initialData.map(d => d.moisture),
+                            borderColor: '#3b82f6',
+                            tension: 0.4,
+                            borderDash: [5, 5]
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b' }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: '#64748b' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function initSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Connected to Ledger Real-Time');
+                socket.emit('subscribeToBatch', batchId);
+            });
+
+            socket.on('telemetryUpdate', (data) => {
+                console.log('Live Data Received:', data);
+                updateLiveUI(data);
+            });
+        }
+
+        function updateLiveUI(data) {
+            // Update Chart
+            if (telemetryChart) {
+                const timeStr = new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                telemetryChart.data.labels.push(timeStr);
+                telemetryChart.data.datasets[0].data.push(data.temperature);
+                telemetryChart.data.datasets[1].data.push(data.moisture);
+
+                if (telemetryChart.data.labels.length > 15) {
+                    telemetryChart.data.labels.shift();
+                    telemetryChart.data.datasets[0].data.shift();
+                    telemetryChart.data.datasets[1].data.shift();
+                }
+                telemetryChart.update('none');
+            }
+
+            // Update AI Insights (Simplified for demo)
+            // Ideally call a small API endpoint for AI re-analysis or do it client side
+            const score = (data.moisture > 30 && data.moisture < 60) ? 90 : 40;
+            document.getElementById('health-score').innerText = `${score}%`;
+        }
+    </script>
+</body>
+</html>

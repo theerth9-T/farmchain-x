@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmChain X | Secure Access</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: radial-gradient(circle at top right, #1a4d2e, #0f172a);
+            overflow: hidden;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-focus {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-focus:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .floating-orb {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(26, 77, 46, 0.1));
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: float 10s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6 text-white">
+
+    <div class="floating-orb" style="top: -100px; right: -100px;"></div>
+    <div class="floating-orb" style="bottom: -150px; left: -100px; animation-delay: -5s;"></div>
+
+    <div class="w-full max-w-xl">
+        <div class="text-center mb-12">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 mb-6 group transition-all hover:scale-110">
+                <i class="fa-solid fa-seedling text-4xl text-emerald-500 group-hover:rotate-12 transition-transform"></i>
+            </div>
+            <h1 class="text-5xl font-black tracking-tighter mb-2">FARM CHAIN X</h1>
+            <p class="text-emerald-500/60 font-bold uppercase tracking-[0.4em] text-[10px]">Unified Agricultural Ledger</p>
+        </div>
+
+        <div class="glass p-12 rounded-[3.5rem] relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-3xl"></div>
+            
+            <div class="mb-8 flex items-center justify-center">
+                <span class="bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-black uppercase tracking-[0.3em] px-4 py-2 rounded-full flex items-center gap-2">
+                    <i class="fa-solid fa-unlock animate-pulse"></i> Showcase Mode Enabled: All Access Granted
+                </span>
+            </div>
+
+            <form id="loginForm" class="space-y-8 relative z-10">
+                <div class="space-y-6">
+                    <div class="relative">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 ml-4 mb-2 block">Enterprise Email</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-envelope absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500/40"></i>
+                            <input type="email" id="email" required 
+                                class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 font-bold outline-none input-focus text-white placeholder:text-white/10"
+                                placeholder="any@email.io">
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 ml-4 mb-2 block">Security Credential</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500/40"></i>
+                            <input type="password" id="password" required 
+                                class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 font-bold outline-none input-focus text-white placeholder:text-white/10"
+                                placeholder="any-password">
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-emerald-500/60 ml-4 mb-2 block">System Role Access</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-id-badge absolute left-6 top-1/2 -translate-y-1/2 text-emerald-500/40"></i>
+                            <select id="role" required 
+                                class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-14 pr-6 font-bold outline-none input-focus text-white appearance-none cursor-pointer">
+                                <option value="" class="bg-slate-900">Select Access Protocol</option>
+                                <option value="farmer" class="bg-slate-900">Farmer Console</option>
+                                <option value="distributor" class="bg-slate-900">Distributor</option>
+                                <option value="consumer" class="bg-slate-900">Consumer Traceability</option>
+                                <option value="regulator" class="bg-slate-900">Regulatory Oversight</option>
+                                <option value="admin" class="bg-slate-900">Global Admin</option>
+                            </select>
+                            <i class="fa-solid fa-chevron-down absolute right-6 top-1/2 -translate-y-1/2 text-white/20 pointer-events-none"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="error-msg" class="hidden animate-in fade-in slide-in-from-top-2">
+                    <div class="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] font-bold uppercase tracking-widest p-4 rounded-xl flex items-center gap-3">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span id="error-text">Credential verification failed</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" 
+                    class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-6 rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-xl shadow-emerald-500/20 flex items-center justify-center gap-3 active:scale-95">
+                    <span>Initiate Session</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <div class="pt-6 border-t border-white/5 grid grid-cols-2 gap-3 text-center">
+                    <button type="button" onclick="quickLogin('admin')" class="text-[8px] font-black uppercase tracking-widest border border-white/10 py-2 rounded-lg hover:bg-white/5 transition-all">Quick Admin</button>
+                    <button type="button" onclick="quickLogin('farmer')" class="text-[8px] font-black uppercase tracking-widest border border-white/10 py-2 rounded-lg hover:bg-white/5 transition-all">Quick Farmer</button>
+                </div>
+            </form>
+        </div>
+
+        <p class="text-center mt-12 text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">
+            Distributed Ledger Technology &copy; 2026 FarmChain X
+        </p>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMsg = document.getElementById('error-msg');
+        const errorText = document.getElementById('error-text');
+
+        function quickLogin(role) {
+            document.getElementById('email').value = `${role}@showcase.io`;
+            document.getElementById('password').value = 'showcase';
+            document.getElementById('role').value = role;
+            loginForm.dispatchEvent(new Event('submit'));
+        }
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // UI State
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Initializing Neural Link...';
+            errorMsg.classList.add('hidden');
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const selectedRole = document.getElementById('role').value;
+
+            try {
+                // Point to current origin
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role: selectedRole })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    sessionStorage.setItem('role', result.role);
+                    
+                    // Premium redirect experience
+                    submitBtn.classList.remove('bg-emerald-500');
+                    submitBtn.classList.add('bg-blue-500');
+                    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Session Verified';
+                    
+                    setTimeout(() => {
+                        const targetDashboards = {
+                            'farmer': 'farmer-dashboard.html',
+                            'distributor': 'distributor-dashboard.html',
+                            'consumer': 'consumer-dashboard.html',
+                            'regulator': 'regulator-dashboard.html',
+                            'admin': 'admin-dashboard.html'
+                        };
+                        window.location.href = targetDashboards[result.role] || 'index.html';
+                    }, 800);
+                } else {
+                    throw new Error(result.error || 'Authentication Failed');
+                }
+            } catch (err) {
+                console.error('Login error:', err);
+                errorText.innerText = err.message;
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = 'Initiate Session <i class="fa-solid fa-arrow-right"></i>';
+            }
+        });
+    </script>
+</body>
+</html>

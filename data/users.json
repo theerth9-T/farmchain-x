@@ -1,0 +1,89 @@
+[
+  {
+    "_id": "13f8dee3-13e8-46d7-8451-e4509669290f",
+    "createdAt": "2026-04-18T18:15:07.429Z",
+    "name": "Admin Alice",
+    "email": "admin@test.com",
+    "password": "$2b$10$vYsJfYoowkyl24d093YvNeZ529BIyM9FiDKvMFIzIq/dY6.wHmCku",
+    "role": "admin"
+  },
+  {
+    "_id": "c9adae4e-3216-49b3-842c-e574f02722f5",
+    "createdAt": "2026-04-19T05:09:31.499Z",
+    "role": "distributor",
+    "name": "rabeeh",
+    "email": "admin@test.com",
+    "password": "$2b$10$JPKJ6t1zwh6z/WGuQbuT2.YUNkW2qgytv6sk.Ojd65xFEjl3PeNtS",
+    "farmName": "",
+    "location": ""
+  },
+  {
+    "_id": "1de548e3-7938-4903-a6c6-5da826541a71",
+    "createdAt": "2026-04-19T10:37:24.322Z",
+    "name": "an",
+    "email": "an@test.com",
+    "password": "$2b$10$f2KAUd8VC4UwKk6wwYgoT.PVFdbMDvmnLhQ4uEJ1Q6E.3b.DU/sim",
+    "role": "farmer"
+  },
+  {
+    "_id": "12168d80-d6a3-4ac5-b29d-599bbca86972",
+    "createdAt": "2026-04-19T10:37:47.453Z",
+    "name": "admasdasasin",
+    "email": "admasdasasin@test.com",
+    "password": "$2b$10$OGbcn3vHw/ssFFHU8hI5u.QVKHjsLfGdNrjvlZzDv/tzMl4/.W1bS",
+    "role": "distributor"
+  },
+  {
+    "_id": "c72ebee0-236b-4575-90be-4e42a08896dc",
+    "createdAt": "2026-04-19T10:41:03.740Z",
+    "name": "aaakakkla",
+    "email": "aaakakkla@test.com",
+    "password": "$2b$10$c8VAaF/9F4jhZxPHdCiZA.4GhMXpVRKicYndKmNKKJ/vqKhmp.Tya",
+    "role": "distributor"
+  },
+  {
+    "_id": "2aadb114-eaf4-425d-bd0a-c15f0a4c6b71",
+    "createdAt": "2026-04-19T11:03:25.819Z",
+    "name": "theerthas6060",
+    "email": "theerthas6060@gmail.com",
+    "password": "$2b$10$IjEJLLdumSUmkgwCtjl8zO1v1mmO5t8QQCxa0wembJR8PdfLzIdfy",
+    "role": "admin",
+    "updatedAt": "2026-04-19T13:26:34.819Z"
+  },
+  {
+    "_id": "800a5441-2260-4504-879d-dc2acbcba259",
+    "createdAt": "2026-04-19T11:04:08.939Z",
+    "name": "farmer",
+    "email": "farmer@showcase.io",
+    "password": "$2b$10$Ef0NNaXk/srGPwm8I4wXduE662g8lPcOcGBB0HlD6mshTsuWK7zr2",
+    "role": "farmer"
+  },
+  {
+    "_id": "cde37a3b-ffe5-4185-a2fd-b534c8b75c64",
+    "createdAt": "2026-04-19T11:12:18.946Z",
+    "name": "admin",
+    "email": "admin@showcase.io",
+    "password": "$2b$10$.S7kggtNnKmdGSY1ZpgwrejTE3qmrbNBJikfcqDuLJVapmRqkQJxy",
+    "role": "admin"
+  },
+  {
+    "_id": "1f797575-8f27-4b87-9c4a-ecac153d0fd6",
+    "createdAt": "2026-04-19T13:27:11.249Z",
+    "name": "Samuel",
+    "email": "samuel@mil.com",
+    "password": "$2b$10$.VT3O76/NsPfDTtjzI3ae.Jm7z9jIyAy3vFKuaVoPK9JUKEEinhC2",
+    "role": "consumer",
+    "farmName": "",
+    "location": ""
+  },
+  {
+    "_id": "407411ce-354d-4fc6-8ad7-eda342f75fae",
+    "createdAt": "2026-04-19T13:27:49.238Z",
+    "name": "Riya",
+    "email": "riya@gmail.com",
+    "password": "$2b$10$YoKJVL3zKuSDTAtUNbRq6.30kEbyIo4PkyJMe0b7zkt0V7c5DAwAC",
+    "role": "regulator",
+    "farmName": "",
+    "location": ""
+  }
+]

@@ -1,0 +1,63 @@
+[
+  {
+    "_id": "3a1deb67-8e36-43ac-8e82-ddcc51dd50eb",
+    "createdAt": "2026-04-18T18:22:55.953Z",
+    "status": "delivered",
+    "cropVariety": "coffe powder",
+    "batchId": "batch no1",
+    "sowingDate": "2006-02-12",
+    "location": "Green Valley",
+    "farmer": "021e0612-2e3b-49ff-9da6-c9325ad805a8",
+    "updatedAt": "2026-04-19T04:03:34.447Z"
+  },
+  {
+    "_id": "99e60a96-0452-4459-a97d-a87fe05de044",
+    "createdAt": "2026-04-19T11:14:49.409Z",
+    "status": "sown",
+    "cropVariety": "Coffee",
+    "batchId": "BATCH-1",
+    "sowingDate": "2025-01-11",
+    "location": "Green Valley",
+    "farmer": "2aadb114-eaf4-425d-bd0a-c15f0a4c6b71"
+  },
+  {
+    "_id": "8800bdb8-ade1-4928-9777-31384c500fd1",
+    "createdAt": "2026-04-19T13:14:34.603Z",
+    "status": "sown",
+    "cropVariety": "Tomato",
+    "batchId": "#Batch 2",
+    "sowingDate": "2025-01-14",
+    "location": "Green Valley",
+    "farmer": "2aadb114-eaf4-425d-bd0a-c15f0a4c6b71"
+  },
+  {
+    "_id": "8a07b2a2-077a-4361-82e1-2233ddc6feb2",
+    "createdAt": "2026-04-19T13:15:06.616Z",
+    "status": "sown",
+    "cropVariety": "Potato",
+    "batchId": "#Batch 3",
+    "sowingDate": "2025-01-27",
+    "location": "Green Valley",
+    "farmer": "2aadb114-eaf4-425d-bd0a-c15f0a4c6b71"
+  },
+  {
+    "_id": "fa8e1490-27f0-4870-a3aa-68e30b05c49b",
+    "createdAt": "2026-04-19T13:15:30.327Z",
+    "status": "sown",
+    "cropVariety": "Apple",
+    "batchId": "#Batch 4",
+    "sowingDate": "2025-02-16",
+    "location": "Green Valley",
+    "farmer": "2aadb114-eaf4-425d-bd0a-c15f0a4c6b71"
+  },
+  {
+    "_id": "4615442e-0991-4506-b7ff-2d1a65d3b923",
+    "createdAt": "2026-04-19T13:16:25.376Z",
+    "status": "sown",
+    "cropVariety": "Bannana",
+    "batchId": "#Batch 5",
+    "sowingDate": "2025-07-08",
+    "location": "Green Valley",
+    "farmer": "2aadb114-eaf4-425d-bd0a-c15f0a4c6b71"
+  }
+]

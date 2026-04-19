@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Chain X | AI Traceability</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #fbfbf9; overflow-x: hidden; }
+        .bg-farm-green { background-color: #1a4d2e; }
+        .text-farm-green { color: #1a4d2e; }
+        
+        /* Smooth Page Transitions */
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.4s ease-out; }
+        
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        /* Custom UI Elements */
+        .glass-header { background: rgba(26, 77, 46, 0.95); backdrop-filter: blur(10px); }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #1a4d2e; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+   
+    <!-- 2. FARMER PORTAL (Initially hidden) -->
+    <div id="section-portal" class="hidden min-h-screen flex flex-col">
+        <!-- Persistent Header -->
+        <header class="glass-header text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-lg">
+            <div class="flex items-center gap-4">
+                <button id="back-btn" onclick="goBack()" class="hidden w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition-colors">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <div class="flex flex-col">
+                    <h1 class="text-lg font-black tracking-tight leading-none">FARM CHAIN X</h1>
+                    <span class="text-[9px] font-bold opacity-60 uppercase tracking-widest mt-1">Farmer Dashboard</span>
+                </div>
+            </div>
+            <button onclick="logout()" class="flex items-center gap-2 bg-red-500/20 px-4 py-2 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/40 transition-all border border-red-500/30">
+                <i class="fa-solid fa-power-off"></i> Logout
+            </button>
+        </header>
+
+        <main class="max-w-7xl mx-auto p-4 lg:p-8 w-full flex-grow">
+            
+            <!-- Dashboard Home -->
+            <div id="page-farmer-dashboard" class="page space-y-10">
+                <section>
+                    <h2 class="text-2xl font-black text-farm-green mb-6 flex items-center gap-3">
+                        <i class="fa-solid fa-map-location-dot text-emerald-600"></i> Active Farm Estates
+                    </h2>
+                    <div id="farm-estates-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Dynamic estate cards -->
+                    </div>
+                </section>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <button onclick="navigateTo('page-register')" class="bg-white p-12 rounded-[3rem] border border-dashed border-gray-300 flex flex-col items-center justify-center gap-5 hover:bg-emerald-50 hover:border-emerald-300 transition-all group">
+                        <div class="bg-emerald-100 p-8 rounded-full text-emerald-700 group-hover:scale-110 transition-transform"><i class="fa-solid fa-seedling text-5xl"></i></div>
+                        <div class="text-2xl font-black text-farm-green">Register New Crops</div>
+                        <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Blockchain Batch Registration</p>
+                    </button>
+                    <button onclick="navigateTo('page-upload')" class="bg-white p-12 rounded-[3rem] border border-dashed border-gray-300 flex flex-col items-center justify-center gap-5 hover:bg-emerald-50 hover:border-emerald-300 transition-all group">
+                        <div class="bg-emerald-100 p-8 rounded-full text-emerald-700 group-hover:scale-110 transition-transform"><i class="fa-solid fa-upload text-5xl"></i></div>
+                        <div class="text-2xl font-black text-farm-green">Upload Traceability Data</div>
+                        <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest">Secure Document Provenance</p>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Farm Details -->
+            <div id="page-farm-details" class="page space-y-8">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-3xl font-black text-farm-green">Soil Management</h2>
+                    <span class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-[10px] font-black uppercase">Live Updates</span>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Charts Container -->
+                    <div class="bg-white p-10 rounded-[3rem] border shadow-sm grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="text-center flex flex-col items-center">
+                            <h4 class="text-[11px] font-bold text-gray-400 uppercase mb-6 tracking-widest">Crop Distribution</h4>
+                            <div class="w-44 h-44 relative">
+                                <canvas id="chartDistribution"></canvas>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                    <span class="text-xl font-black text-farm-green">3 Varieties</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center flex flex-col items-center border-l border-gray-100">
+                            <h4 class="text-[11px] font-bold text-gray-400 uppercase mb-6 tracking-widest">Health Index</h4>
+                            <div class="w-44 h-44 relative">
+                                <canvas id="chartHealth"></canvas>
+                                <div class="absolute inset-0 flex items-center justify-center pointer-events-none flex-col pt-4">
+                                    <span class="text-4xl font-black text-farm-green">70%</span>
+                                    <span class="text-[9px] font-bold text-emerald-600 tracking-tighter uppercase">Healthy</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sensor Grid -->
+                    <div class="bg-farm-green p-10 rounded-[3rem] text-white shadow-xl flex flex-col justify-between">
+                        <h3 class="text-xl font-black flex items-center gap-3 mb-8">
+                            <i class="fa-solid fa-flask text-emerald-400"></i> IoT Sensor Mesh
+                        </h3>
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="bg-white/10 p-5 rounded-[2rem] border border-white/5 text-center">
+                                <i class="fa-solid fa-droplet text-blue-300 mb-2"></i>
+                                <div class="text-[9px] font-bold uppercase opacity-50">Moisture</div>
+                                <div class="text-2xl font-black">24%</div>
+                            </div>
+                            <div class="bg-white/10 p-5 rounded-[2rem] border border-white/5 text-center">
+                                <i class="fa-solid fa-temperature-high text-orange-300 mb-2"></i>
+                                <div class="text-[9px] font-bold uppercase opacity-50">Temp</div>
+                                <div class="text-2xl font-black">28°C</div>
+                            </div>
+                            <div class="bg-white/10 p-5 rounded-[2rem] border border-white/5 text-center">
+                                <i class="fa-solid fa-vial text-emerald-300 mb-2"></i>
+                                <div class="text-[9px] font-bold uppercase opacity-50">Nutrients</div>
+                                <div class="text-2xl font-black">70%</div>
+                            </div>
+                        </div>
+                        <p class="mt-8 text-[9px] font-bold opacity-40 text-center tracking-widest uppercase">Encryption Key: SHA-256 Verified</p>
+                    </div>
+                </div>
+
+                <!-- Timeline & QR Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Supply Chain Timeline -->
+                    <div class="lg:col-span-2 bg-white p-10 rounded-[3rem] border shadow-sm">
+                        <h3 class="text-xl font-black text-farm-green mb-10 flex items-center gap-3">
+                            <i class="fa-solid fa-route text-emerald-600"></i> Supply Chain Journey
+                        </h3>
+                        <div id="timeline-container" class="flex justify-between items-center relative px-4">
+                            <!-- Timeline line -->
+                            <div class="absolute left-8 right-8 h-1 bg-gray-100 top-5 -z-0"></div>
+                            <div id="timeline-progress" class="absolute left-8 h-1 bg-emerald-500 top-5 -z-0 transition-all duration-1000" style="width: 0%"></div>
+                            
+                            <!-- Steps injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- QR Hub -->
+                    <div class="bg-white p-10 rounded-[3rem] border shadow-sm flex flex-col items-center justify-center text-center space-y-4">
+                        <div id="qrcode" class="p-4 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200"></div>
+                        <div>
+                            <h4 class="font-black text-farm-green">Public Verification</h4>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Scan for Ledger Proof</p>
+                        </div>
+                        <a id="public-link" href="#" target="_blank" class="text-[10px] font-black text-emerald-600 hover:underline">OPEN PUBLIC VIEW</a>
+                    </div>
+                </div>
+
+                <!-- AI Insights Header -->
+                <div id="ai-insight-panel" class="hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div class="bg-gradient-to-r from-emerald-600 to-farm-green p-1 w-full rounded-[3rem]">
+                        <div class="bg-white p-10 rounded-[2.8rem] flex flex-col md:flex-row items-center gap-10">
+                            <div class="bg-emerald-50 w-24 h-24 rounded-full flex items-center justify-center text-3xl text-emerald-600 shrink-0">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <span id="ai-status-badge" class="px-3 py-1 rounded-full text-[9px] font-black uppercase bg-emerald-100 text-emerald-700">Optimal Condition</span>
+                                    <span class="text-[10px] font-bold text-gray-400">AI AGENT: TRACE-X900</span>
+                                </div>
+                                <h3 class="text-2xl font-black text-farm-green mb-2">Health Consensus: <span id="ai-health-val">94%</span></h3>
+                                <p id="ai-recommendation" class="text-sm text-gray-500 font-medium leading-relaxed italic">"Sensors indicate stable nitrogen levels. Maintain current irrigation cycle for another 48 hours for maximum yield."</p>
+                            </div>
+                            <div class="shrink-0 flex gap-2">
+                                <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                <span class="text-[8px] font-black text-emerald-500 uppercase tracking-widest">Live Analysis</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yield AI Insights -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-10 rounded-[3rem] border shadow-sm">
+                        <h3 class="text-xl font-black text-farm-green mb-8 flex items-center gap-3">
+                            <i class="fa-solid fa-robot text-emerald-600"></i> Harvest Projections
+                        </h3>
+                        <div class="h-64">
+                            <canvas id="chartYield"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white p-10 rounded-[3rem] border shadow-sm">
+                        <h3 class="text-xl font-black text-farm-green mb-6 flex items-center gap-3">
+                            <i class="fa-solid fa-list-check text-emerald-600"></i> Harvest Schedule
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="p-5 bg-stone-50 rounded-2xl border border-gray-100 flex items-center justify-between">
+                                <div>
+                                    <div class="font-black text-gray-800">Tomato B-102</div>
+                                    <div class="text-[10px] font-bold text-emerald-600 uppercase">Status: Ripening</div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-xs font-bold text-gray-400">Oct 15</div>
+                                    <span class="text-[9px] font-black text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">STABLE</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="w-full mt-10 bg-farm-green text-white py-5 rounded-2xl font-black text-sm hover:opacity-90 shadow-lg">GENERATE FULL REPORT</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="page-register" class="page">
+                <div class="max-w-2xl mx-auto bg-white p-12 rounded-[3.5rem] border shadow-2xl">
+                    <h2 class="text-3xl font-black text-farm-green mb-10 text-center uppercase tracking-tight">Register New Batch</h2>
+                    <form onsubmit="handleRegistration(event)" class="space-y-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="col-span-2">
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Crop Variety</label>
+                                <input required type="text" class="w-full mt-2 p-5 border-2 border-gray-100 rounded-[1.5rem] bg-gray-50 outline-none focus:border-emerald-500 focus:bg-white transition-all font-bold" placeholder="e.g. Arabica Coffee">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Batch ID</label>
+                                <input required type="text" class="w-full mt-2 p-5 border-2 border-gray-100 rounded-[1.5rem] bg-gray-50 outline-none focus:border-emerald-500 focus:bg-white transition-all font-bold" placeholder="#BATCH-912">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-1">Sowing Date</label>
+                                <input required type="date" class="w-full mt-2 p-5 border-2 border-gray-100 rounded-[1.5rem] bg-gray-50 outline-none focus:border-emerald-500 focus:bg-white transition-all font-bold">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-farm-green text-white py-6 rounded-[2rem] font-black text-xl hover:bg-emerald-900 transition-all shadow-2xl shadow-emerald-900/30 uppercase tracking-widest">Register Batch</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- File Upload -->
+            <div id="page-upload" class="page">
+                <div class="max-w-2xl mx-auto bg-white p-14 rounded-[4rem] border shadow-2xl text-center space-y-10">
+                    <div class="bg-emerald-50 w-28 h-28 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+                        <i class="fa-solid fa-fingerprint text-5xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-black text-farm-green">Data Provenance</h2>
+                        <p class="text-gray-400 mt-2 text-sm font-medium">Verify crop authenticity by uploading certificates.</p>
+                    </div>
+                    <div class="border-4 border-dashed border-gray-100 rounded-[3rem] p-16 hover:bg-emerald-50 transition-all cursor-pointer relative group">
+                        <input type="file" class="absolute inset-0 opacity-0 cursor-pointer" onchange="alert('Data ready for ledger hashing.')">
+                        <div class="space-y-4">
+                            <i class="fa-solid fa-file-invoice text-5xl text-gray-200 group-hover:text-emerald-500 transition-colors"></i>
+                            <div class="font-black text-gray-400">Click to Select Reports</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+    
+    <!-- Custom Deletion Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden z-[150] flex items-center justify-center p-6 animate-in fade-in duration-300">
+        <div class="bg-white p-10 rounded-[3rem] max-w-sm w-full text-center space-y-8 shadow-2xl scale-in-center">
+            <div class="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-3xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h3 class="text-2xl font-black text-farm-green uppercase tracking-tight">Delete Batch?</h3>
+                <p class="text-gray-500 text-sm font-bold leading-relaxed mt-2 uppercase tracking-widest text-[10px]">This action will permanently purge all real-time IoT history and ledger records.</p>
+            </div>
+            <div class="flex gap-4">
+                <button onclick="closeDeleteModal()" class="flex-1 bg-gray-100 text-gray-400 py-4 rounded-2xl font-black text-xs hover:bg-gray-200 transition-all uppercase tracking-widest">Cancel</button>
+                <button onclick="confirmDelete()" class="flex-1 bg-red-500 text-white py-4 rounded-2xl font-black text-xs hover:bg-red-600 transition-all shadow-lg shadow-red-500/20 uppercase tracking-widest">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-overlay" class="fixed inset-0 bg-farm-green/95 hidden z-[100] flex items-center justify-center p-6">
+        <div class="bg-white p-12 rounded-[4rem] max-w-sm w-full text-center space-y-6 shadow-2xl">
+            <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                <i class="fa-solid fa-check text-4xl"></i>
+            </div>
+            <h3 class="text-3xl font-black text-farm-green uppercase tracking-tight">Record Hashed</h3>
+            <p class="text-gray-500 text-sm font-bold leading-relaxed">Data has been successfully pushed to the FarmChain ledger.</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification System -->
+    <div id="toast-container" class="fixed bottom-10 right-10 z-[200] space-y-4"></div>
+
+    <script>
+        /** NAVIGATION & REAL-TIME LOGIC **/
+        let activeBatchId = null;
+        let socket = null;
+        let qrcode = null;
+        let userProfile = null;
+
+        function initSocket() {
+            if (socket || typeof io === 'undefined') return;
+            try {
+                socket = io();
+                
+                socket.on('connect', () => {
+                    console.log('Connected to FarmChain Real-Time Engine');
+                });
+
+                socket.on('telemetryUpdate', (data) => {
+                    console.log('Real-time update received:', data);
+                    if (activeBatchId === data.batch || document.querySelector('#page-farm-details')?.getAttribute('data-id') === data.batch) {
+                        updateLiveUI(data);
+                    }
+                });
+
+                socket.on('batch_created', (batch) => {
+                    showToast(`New Batch Detected: ${batch.cropVariety}`, 'success');
+                    fetchBatches();
+                });
+
+                socket.on('batch_updated', (data) => {
+                    console.log('[Neural Link] Batch Update Received:', data);
+                    fetchBatches(); 
+                    
+                    const currentBatchId = document.querySelector('#page-farm-details')?.getAttribute('data-id');
+                    if (currentBatchId === data.id) {
+                        loadBatchDetails(data.id);
+                        showToast(`Neural Update: ${data.status.toUpperCase()}`, 'success');
+                    }
+                });
+
+                socket.on('batch_deleted', (id) => {
+                    console.log('[Neural Link] Batch Purged:', id);
+                    fetchBatches();
+                    if (document.querySelector('#page-farm-details')?.getAttribute('data-id') === id) {
+                        navigateTo('page-farmer-dashboard');
+                        showToast('Batch was purged from the ledger', 'error');
+                    }
+                });
+
+            } catch (err) {
+                console.warn('Socket.io failed to initialize:', err);
+            }
+        }
+
+        function updateLiveUI(data) {
+            // Update sensor cards
+            document.querySelector('.fa-droplet').nextElementSibling.nextElementSibling.innerText = `${data.moisture}%`;
+            document.querySelector('.fa-temperature-high').nextElementSibling.nextElementSibling.innerText = `${data.temperature}°C`;
+            document.querySelector('.fa-vial').nextElementSibling.nextElementSibling.innerText = `${data.nutrients}%`;
+
+            // Update charts
+            if (charts.health) {
+                // Simplified health update for demo
+                const score = (data.moisture > 30 && data.moisture < 60) ? 90 : 45;
+                charts.health.data.datasets[0].data = [score, 100-score];
+                charts.health.update();
+                document.querySelector('#page-farm-details .text-4xl').innerText = `${score}%`;
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch('/api/auth/logout');
+                sessionStorage.removeItem('role');
+                window.location.href = 'common-login.html';
+            } catch (err) {
+                console.error('Logout error:', err);
+            }
+        }
+
+        async function navigateTo(pageId, batchId = null) {
+            if (batchId) activeBatchId = batchId;
+
+            // Hide all sub-pages in the portal
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            
+            // Show target
+            const target = document.getElementById(pageId);
+            if (target) target.classList.add('active');
+
+            // Header Controls
+            const backBtn = document.getElementById('back-btn');
+            if (pageId === 'page-farmer-dashboard') {
+                backBtn.classList.add('hidden');
+            } else {
+                backBtn.classList.remove('hidden');
+            }
+
+            // Specific Page Logic
+            if (pageId === 'page-farm-details' && activeBatchId) {
+                await loadBatchDetails(activeBatchId);
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBack() {
+            navigateTo('page-farmer-dashboard');
+        }
+
+        /** DATA FETCHING **/
+        async function fetchBatches() {
+            try {
+                const response = await fetch('/api/batches');
+                const result = await response.json();
+                
+                if (result.success) {
+                    renderBatchList(result.data);
+                }
+            } catch (err) {
+                console.error('Error fetching batches:', err);
+            }
+        }
+
+        function renderBatchList(batches) {
+            const container = document.querySelector('#page-farmer-dashboard .grid');
+            if (!container) return;
+
+            if (batches.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center p-12 bg-gray-50 rounded-3xl border-2 border-dashed text-gray-400 font-bold">No batches registered yet. Start by registering your first crop!</div>`;
+                return;
+            }
+
+            container.innerHTML = batches.map(batch => `
+                <div class="group relative bg-white rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-emerald-200 transition-all text-left flex items-center justify-between">
+                    <button onclick="navigateTo('page-farm-details', '${batch._id}')" class="flex-grow p-8 text-left flex items-center justify-between">
+                        <div>
+                            <div class="font-black text-xl text-gray-800">${batch.cropVariety}</div>
+                            <div class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-2 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot"></i> ${batch.location}
+                            </div>
+                            <div class="text-[9px] text-gray-400 font-bold uppercase mt-1">ID: ${batch.batchId} | ${batch.status}</div>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-full text-emerald-600 group-hover:bg-farm-green group-hover:text-white transition-all">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+                    </button>
+                    <!-- Delete Button -->
+                    <button onclick="handleDeleteBatch(event, '${batch._id}')" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-red-100 text-red-500 hover:bg-red-600 hover:text-white shadow-md transition-all flex items-center justify-center text-xs z-30 opacity-0 group-hover:opacity-100">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        let batchToDeleteId = null;
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+            batchToDeleteId = null;
+        }
+
+        async function handleDeleteBatch(e, id) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Delete requested for:', id);
+            batchToDeleteId = id;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        async function confirmDelete() {
+            if (!batchToDeleteId) return;
+            
+            try {
+                const response = await fetch(`/api/batches/${batchToDeleteId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast('Batch successfully purged from the ledger', 'success');
+                    closeDeleteModal();
+                    fetchBatches();
+                } else {
+                    showToast(result.error || 'Deletion failed', 'error');
+                }
+            } catch (err) {
+                console.error('Deletion error:', err);
+                showToast('Blockchain connection interrupted', 'error');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-5 rounded-2xl shadow-2xl flex items-center gap-4 text-white font-bold text-xs uppercase tracking-widest animate-in slide-in-from-right duration-300 ${type === 'success' ? 'bg-emerald-600' : 'bg-red-600'}`;
+            toast.innerHTML = `
+                <i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-triangle-exclamation'}"></i>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('fade-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        async function handleRegistration(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = {
+                cropVariety: form.querySelector('input[placeholder="e.g. Arabica Coffee"]').value,
+                batchId: form.querySelector('input[placeholder="#BATCH-912"]').value,
+                sowingDate: form.querySelector('input[type="date"]').value,
+                location: userProfile?.farmName || userProfile?.location || 'Green Valley'
+            };
+
+            try {
+                const response = await fetch('/api/batches', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const overlay = document.getElementById('success-overlay');
+                    overlay.classList.remove('hidden');
+                    showToast('Crop registered on the FarmChain', 'success');
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        fetchBatches();
+                        navigateTo('page-farmer-dashboard');
+                    }, 2000);
+                } else {
+                    showToast(result.error || 'Registration failed', 'error');
+                }
+            } catch (err) {
+                console.error('Registration error:', err);
+            }
+        }
+
+        async function loadBatchDetails(id) {
+            try {
+                const response = await fetch(`/api/batches/${id}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    const batch = result.data;
+                    document.querySelector('#page-farm-details h2').innerText = `${batch.cropVariety} Management`;
+                    
+                    // Render Timeline
+                    renderTimeline(batch.timeline);
+                    
+                    // Generate QR
+                    generateQR(batch._id);
+
+                    // AI Insights
+                    if (batch.aiAnalysis) {
+                        renderAI(batch.aiAnalysis);
+                    }
+
+                    document.getElementById('page-farm-details').setAttribute('data-id', batch._id);
+                    initCharts(batch._id);
+                    initSocket();
+                    if (socket) socket.emit('subscribeToBatch', batch._id);
+                }
+            } catch (err) {
+                console.error('Error loading details:', err);
+            }
+        }
+
+        function renderTimeline(timeline) {
+            const container = document.getElementById('timeline-container');
+            const progress = document.getElementById('timeline-progress');
+            
+            const activeIndex = timeline.findIndex(t => t.active);
+            progress.style.width = `${(activeIndex / (timeline.length - 1)) * 100}%`;
+
+            container.innerHTML = `
+                <div class="absolute left-8 right-8 h-1 bg-gray-100 top-5 -z-0"></div>
+                ${timeline.map((item, idx) => `
+                    <div class="relative z-10 flex flex-col items-center gap-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center border-4 ${item.completed ? 'bg-emerald-500 border-emerald-100 text-white' : 'bg-white border-gray-100 text-gray-300'} transition-all duration-500">
+                            <i class="fa-solid ${item.completed ? 'fa-check' : 'fa-circle'} text-[10px]"></i>
+                        </div>
+                        <span class="text-[9px] font-black uppercase tracking-tighter ${item.active ? 'text-emerald-600' : 'text-gray-400'}">${item.stage}</span>
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function generateQR(id) {
+            const container = document.getElementById('qrcode');
+            if (!container) return;
+            container.innerHTML = "";
+            
+            if (typeof QRCode !== 'undefined') {
+                qrcode = new QRCode(container, {
+                    text: `${window.location.origin}/traceability.html?batchId=${id}`,
+                    width: 128,
+                    height: 128,
+                    colorDark : "#1a4d2e",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            } else {
+                container.innerHTML = "<div class='text-[8px] font-bold text-gray-300'>QR Code Offline</div>";
+            }
+            document.getElementById('public-link').href = `/traceability.html?batchId=${id}`;
+        }
+
+        function renderAI(ai) {
+            document.getElementById('ai-insight-panel').classList.remove('hidden');
+            document.getElementById('ai-health-val').innerText = `${ai.score}%`;
+            document.getElementById('ai-status-badge').innerText = ai.status;
+            document.getElementById('ai-status-badge').className = `px-3 py-1 rounded-full text-[9px] font-black uppercase bg-${ai.color.split('-')[0]}-100 text-${ai.color}`;
+            document.getElementById('ai-recommendation').innerText = `"${ai.recommendation}"`;
+        }
+
+
+        /** CHARTING LOGIC **/
+        let charts = {};
+        async function initCharts(batchId) {
+            Object.values(charts).forEach(c => c.destroy());
+
+            const config = { cutout: '85%', plugins: { legend: { display: false } } };
+
+            // For now use default data or fetch from /api/batches/:id/sensors
+            // Distribution
+            charts.dist = new Chart(document.getElementById('chartDistribution'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['A', 'B', 'C'],
+                    datasets: [{
+                        data: [40, 30, 30],
+                        backgroundColor: ['#1a4d2e', '#3a7d44', '#86a789'],
+                        borderWidth: 5,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: config
+            });
+
+            // Health (Simulated)
+            charts.health = new Chart(document.getElementById('chartHealth'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [70, 30],
+                        backgroundColor: ['#1a4d2e', '#f3f4f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { 
+                    ...config,
+                    rotation: -90, 
+                    circumference: 180
+                }
+            });
+
+            // Yield Bar
+            charts.yield = new Chart(document.getElementById('chartYield'), {
+                type: 'bar',
+                data: {
+                    labels: ['Aug', 'Sep', 'Oct'],
+                    datasets: [{
+                        data: [50, 75, 90],
+                        backgroundColor: '#1a4d2e',
+                        borderRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { 
+                        y: { display: false },
+                        x: { grid: { display: false }, border: { display: false } }
+                    }
+                }
+            });
+        }
+
+        /** AUTH PROTECTION **/
+        document.addEventListener('DOMContentLoaded', async () => {
+            const role = sessionStorage.getItem('role');
+            
+            // Verify session with server
+            try {
+                const response = await fetch('/api/auth/me', { credentials: 'include' });
+                const result = await response.json();
+                
+                if (result.success) { // Relaxed for Showcase Mode
+                    userProfile = result.data;
+                    document.getElementById('section-portal').classList.remove('hidden');
+                    
+                    // Add Admin Return Banner
+                    if (result.data.role === 'admin') {
+                        const banner = document.createElement('div');
+                        banner.className = 'bg-slate-900 text-white p-3 flex justify-between items-center px-8 sticky top-0 z-[110] border-b border-emerald-500/30';
+                        banner.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <span class="bg-emerald-500 text-slate-900 px-2 py-0.5 rounded-md text-[9px] font-black uppercase">Admin Portal</span>
+                                <span class="text-[11px] font-bold text-slate-300">Shadowing Farmer Command Console</span>
+                            </div>
+                            <a href="admin-dashboard.html" class="bg-white/10 hover:bg-white/20 text-white px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border border-white/10">Return to Admin Center</a>
+                        `;
+                        document.body.prepend(banner);
+                    }
+
+                    // Render Estate
+                    const estateContainer = document.getElementById('farm-estates-container');
+                    estateContainer.innerHTML = `
+                        <button onclick="navigateTo('page-farm-details')" class="group bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-emerald-200 transition-all text-left flex items-center justify-between">
+                            <div>
+                                <div class="font-black text-xl text-gray-800">${userProfile.farmName || 'Primary Estate'}</div>
+                                <div class="text-[10px] text-emerald-600 font-bold uppercase tracking-widest mt-2 flex items-center gap-1">
+                                    <i class="fa-solid fa-location-dot"></i> ${userProfile.location || 'Verified District'}
+                                </div>
+                            </div>
+                            <div class="bg-emerald-50 p-4 rounded-full text-emerald-600 group-hover:bg-farm-green group-hover:text-white transition-all">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </button>
+                    `;
+
+                    initSocket();
+                    fetchBatches();
+                    navigateTo('page-farmer-dashboard');
+                } else {
+                    window.location.href = 'common-login.html';
+                }
+            } catch (err) {
+                console.error('Auth Error:', err);
+                window.location.href = 'common-login.html';
+            }
+        });
+    </script>
+</body>
+</html>
